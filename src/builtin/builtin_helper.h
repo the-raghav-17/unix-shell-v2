@@ -5,6 +5,8 @@
 int builtin_fg(char **argv, int argc);
 int builtin_bg(char **argv, int argc);
 int builtin_jobs(char **argv, int argc);
+int builtin_cd(char **argv, int argc);
+
 int parse_args(char **argv, int argc);
 
 

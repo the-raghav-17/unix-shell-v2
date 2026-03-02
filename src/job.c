@@ -229,6 +229,9 @@ wait_for_job(Job *job)
 void
 put_job_in_foreground(Job *job, bool cont)
 {
+    // BUG TODO: Trying to put a subshell into foreground when
+    //  its stopped leads to a bug
+
     if (job == NULL) {
         return;
     }
@@ -237,7 +240,7 @@ put_job_in_foreground(Job *job, bool cont)
     tcsetattr(get_shell_terminal(), TCSANOW, &job->tmodes);
     if (cont == true) {
         CONT_JOB(job);
-        job->is_stopped    = false;
+        job->is_stopped = false;
     }
 
     job->in_foreground = true;

@@ -21,15 +21,20 @@ static int init_shell(void);
 static void start_shell_loop(void);
 
 
-static pid_t shell_pgid;
-static int   shell_terminal;
-static struct termios shell_tmodes; /* to save shell's terminal settings */
+typedef struct Shell_param
+{
+    pid_t shell_pgid;
+    int   shell_terminal;
+    struct termios shell_tmodes;
+} Shell_param;
+
+static Shell_param shell_param;
 
 
 int
 get_shell_terminal(void)
 {
-    return shell_terminal;
+    return shell_param.shell_terminal;
 }
 
 
@@ -53,8 +58,8 @@ set_signals_to_ignore(void)
 static int
 put_shell_in_new_group(void)
 {
-    shell_pgid = getpid();
-    if (setpgid(shell_pgid, shell_pgid) == -1) {
+    shell_param.shell_pgid = getpid();
+    if (setpgid(shell_param.shell_pgid, shell_param.shell_pgid) == -1) {
         perror("Couldn't put the shell in new process group");
         return -1;
     }
@@ -67,20 +72,20 @@ void
 put_shell_in_foreground(void)
 {
     /* Put shell in foreground */
-    tcsetpgrp(shell_terminal, shell_pgid);
+    tcsetpgrp(shell_param.shell_terminal, shell_param.shell_pgid);
 
     /* Restore shell's terminal settings */
-    tcsetattr(get_shell_terminal(), TCSANOW, &shell_tmodes);
+    tcsetattr(get_shell_terminal(), TCSANOW, &(shell_param.shell_tmodes));
 }
 
 
 #define IS_SHELL_IN_FOREGROUND() \
-        (tcgetpgrp(shell_terminal) == getpgrp())  /* compare foreground group with shell's group */
+        (tcgetpgrp(shell_param.shell_terminal) == getpgrp())  /* compare foreground group with shell's group */
 
 static int
 init_shell(void)
 {
-    shell_terminal = open("/dev/tty", O_RDONLY);
+    shell_param.shell_terminal = open("/dev/tty", O_RDONLY);
 
     /* Stop the process group the shell belongs to if started in background */
     while (!IS_SHELL_IN_FOREGROUND()) {
@@ -93,7 +98,7 @@ init_shell(void)
     set_signals_to_ignore();
 
     /* Get terminal settings */
-    tcgetattr(get_shell_terminal(), &shell_tmodes);
+    tcgetattr(get_shell_terminal(), &(shell_param.shell_tmodes));
 
     /* Grab control of the terminal */
     put_shell_in_foreground();

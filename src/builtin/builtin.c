@@ -11,9 +11,10 @@ match_builtin(char **argv)
 {
     assert(argv != NULL && argv[0] != NULL);
 
-    if (!strcmp(argv[0], "fg")) return BUILTIN_FG;
-    if (!strcmp(argv[0], "bg")) return BUILTIN_BG;
+    if (!strcmp(argv[0], "fg"))   return BUILTIN_FG;
+    if (!strcmp(argv[0], "bg"))   return BUILTIN_BG;
     if (!strcmp(argv[0], "jobs")) return BUILTIN_JOBS;
+    if (!strcmp(argv[0], "cd"))   return BUILTIN_CD;
 
     return BUILTIN_NONE;
 }
@@ -49,6 +50,10 @@ exec_builtin(Builtin builtin, char **argv, int argc, int infile, int outfile)
 
         case BUILTIN_JOBS:
             return_val = builtin_jobs(argv, argc);
+            break;
+
+        case BUILTIN_CD:
+            return_val = builtin_cd(argv, argc);
             break;
 
         default:
