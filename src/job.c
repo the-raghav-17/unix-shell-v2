@@ -3,6 +3,8 @@
 #include "process.h"
 #include "shell.h"
 
+#include <bits/types/idtype_t.h>
+#include <bits/types/siginfo_t.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <termios.h>
@@ -18,6 +20,7 @@
 static int get_job_number(Job *job_node);
 static void add_node_to_job_list(Job *job_node);
 static void destroy_job_obj(Job *job);
+static void terminate_job(Job *job);
 static void wait_for_job(Job *job);
 
 
@@ -161,6 +164,29 @@ add_subshell_to_job(pid_t gid, bool is_stopped, bool in_foreground)
 }
 
 
+static void
+terminate_job(Job *job)
+{
+    kill(-job->gid, SIGINT);
+
+    /* Reap children */
+    siginfo_t infop;
+    for (int i = 0; i < job->process_count; i++) {
+        waitid(P_PGID, job->gid, &infop, WEXITED | WNOHANG);
+    }
+}
+
+
+void
+terminate_all_jobs(void)
+{
+    for (Job *job = job_head; job != NULL; job = job->next) {
+        terminate_job(job);
+        /* destroy_job_obj(job); */
+    }
+}
+
+
 void
 notify_job_status(Job *job)
 {
@@ -217,6 +243,7 @@ wait_for_job(Job *job)
                     kill(-job->gid, sig);
                     has_sent_kill_sig = true;
                 }
+                printf("\n");
                 break;
         }
     }

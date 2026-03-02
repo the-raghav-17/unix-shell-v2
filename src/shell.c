@@ -6,9 +6,9 @@
 #include "parser.h"
 #include "token.h"
 #include "user.h"
-#include "utils.h"
 
 #include <stdio.h>
+#include <string.h>
 #include <stdlib.h>
 #include <fcntl.h>
 #include <unistd.h>
@@ -110,6 +110,9 @@ init_shell(void)
 #undef IS_SHELL_IN_FOREGROUND
 
 
+#define TEXT_COLOR_START "\e[32m"  /* green color */
+#define TEXT_COLOR_END   "\e[0m"
+
 static void
 display_prompt(void)
 {
@@ -127,12 +130,18 @@ display_prompt(void)
     char *cwd = getcwd(NULL, 0);
     if (cwd == NULL) {
         perror("getcwd");
-        cwd = "<unable-to-retrieve-current-working-directory>";
+        cwd = "<null>";
     }
 
-    printf("%s@%s: %s\n", username, hostname, cwd);
-    printf("> ");
+    printf(TEXT_COLOR_START"%s@%s: %s\n"TEXT_COLOR_END, username, hostname, cwd);
+    printf("$> ");
+    if (strcmp(cwd, "<null>")) {
+        free(cwd);
+    }
 }
+
+#undef TEXT_COLOR_START
+#undef TEXT_COLOR_END
 
 
 static void
@@ -155,7 +164,7 @@ start_shell_loop(void)
 
         List_node *list_head = parse_tokens(tokens);
         if (list_head == NULL) {
-            free_tokens(tokens);
+            free(tokens);
             free(line);
             continue;
         }

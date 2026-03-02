@@ -28,5 +28,6 @@ builtin_bg(char **argv, int argc)
 
     bool cont = true;
     put_job_in_background(job_node, cont);
+    notify_job_status(job_node);
     return 0;
 }

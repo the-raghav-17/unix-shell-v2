@@ -15,6 +15,7 @@ match_builtin(char **argv)
     if (!strcmp(argv[0], "bg"))   return BUILTIN_BG;
     if (!strcmp(argv[0], "jobs")) return BUILTIN_JOBS;
     if (!strcmp(argv[0], "cd"))   return BUILTIN_CD;
+    if (!strcmp(argv[0], "exit"))       return BUILTIN_EXIT;
 
     return BUILTIN_NONE;
 }
@@ -54,6 +55,10 @@ exec_builtin(Builtin builtin, char **argv, int argc, int infile, int outfile)
 
         case BUILTIN_CD:
             return_val = builtin_cd(argv, argc);
+            break;
+
+        case BUILTIN_EXIT:
+            return_val = builtin_exit(argv, argc);
             break;
 
         default:

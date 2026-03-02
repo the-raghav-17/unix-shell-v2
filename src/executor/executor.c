@@ -89,11 +89,12 @@ traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell)
 static void
 traverse_ast_in_subshell(Ast_node *ast_root, bool in_foreground)
 {
+    /* Create subshell */
     pid_t pid = fork();
 
     switch (pid) {
         case -1:
-            fprintf(stderr, "Subshell spawning failed");
+            perror("Subshell spawning failed");
             break;
 
         case 0:
