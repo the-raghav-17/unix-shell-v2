@@ -7,6 +7,7 @@ typedef enum Builtin
     BUILTIN_FG, BUILTIN_BG, BUILTIN_JOBS,
     BUILTIN_CD,
     BUILTIN_EXIT,
+    BUILTIN_EXEC,
 
     BUILTIN_NONE,
 } Builtin;

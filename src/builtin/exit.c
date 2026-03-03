@@ -22,6 +22,7 @@ builtin_exit(char **argv, int argc)
 
     if (get_job_head() != NULL) {
         printf("Terminating all jobs...\n");
+        // TODO: Add a sigchild signal handler here which ignores sigchild
         terminate_all_jobs();
     }
     printf("[Exiting...]\n");
