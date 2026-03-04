@@ -16,7 +16,7 @@
 #include <termios.h>
 
 
-static void set_signals_to_ignore(void);
+static void set_signal_disposition(void);
 static int put_shell_in_new_group(void);
 static int init_shell(void);
 static void display_prompt(void);
@@ -33,43 +33,6 @@ typedef struct Shell_param
 static Shell_param shell_param;
 
 
-int
-get_shell_terminal(void)
-{
-    return shell_param.shell_terminal;
-}
-
-
-static void
-set_signals_to_ignore(void)
-{
-    struct sigaction action;
-
-    action.sa_handler = SIG_IGN;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-
-    // sigaction(SIGINT, &action, NULL);  for now turning it off
-    sigaction(SIGQUIT, &action, NULL);
-    sigaction(SIGTSTP, &action, NULL);
-    sigaction(SIGTTIN, &action, NULL);
-    sigaction(SIGTTOU, &action, NULL);
-}
-
-
-static int
-put_shell_in_new_group(void)
-{
-    shell_param.shell_pgid = getpid();
-    if (setpgid(shell_param.shell_pgid, shell_param.shell_pgid) == -1) {
-        perror("Couldn't put the shell in new process group");
-        return -1;
-    }
-
-    return 0;
-}
-
-
 void
 put_shell_in_foreground(void)
 {
@@ -81,15 +44,67 @@ put_shell_in_foreground(void)
 }
 
 
-#define IS_SHELL_IN_FOREGROUND() \
-        (tcgetpgrp(shell_param.shell_terminal) == getpgrp())  /* compare foreground group with shell's group */
+int
+get_shell_terminal(void)
+{
+    return shell_param.shell_terminal;
+}
 
+
+static void
+set_signal_disposition(void)
+{
+    struct sigaction action;
+
+    action.sa_handler = SIG_IGN;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
+    /* These signals are to be ignored */
+    sigaction(SIGINT, &action, NULL);
+    sigaction(SIGQUIT, &action, NULL);
+    sigaction(SIGTSTP, &action, NULL);
+    sigaction(SIGTTIN, &action, NULL);
+    sigaction(SIGTTOU, &action, NULL);
+
+    // TODO: Add a disposition for SIGCHLD
+}
+
+
+static int
+put_shell_in_new_group(void)
+{
+    /* Shell will be the group leader of the new
+       group created. Thus pid == pgid of shell. */
+    pid_t pid = getpid();
+    if (setpgid(pid, pid) == -1) {
+        perror("Couldn't put the shell in new process group");
+        return -1;
+    }
+
+    shell_param.shell_pgid = pid;
+    return 0;
+}
+
+
+/* Compare foreground group of terminal with shell's terminal */
+#define IS_SHELL_IN_FOREGROUND() \
+        (tcgetpgrp(shell_param.shell_terminal) == getpgrp())
+
+/* Setup the shell */
 static int
 init_shell(void)
 {
+    /* Get descriptor associated with shell terminal */
     shell_param.shell_terminal = open("/dev/tty", O_RDONLY);
+    if (shell_param.shell_terminal == -1) {
+        perror("Getting shell terminal failed");
+        return -1;
+    }
 
-    /* Stop the process group the shell belongs to if started in background */
+    /* If shell is started as the background group of
+       the already present shell, we need to stop that
+       group until user explicitly puts the shell in foregroung */
     while (!IS_SHELL_IN_FOREGROUND()) {
         kill(0, SIGTTIN);
     }
@@ -97,7 +112,7 @@ init_shell(void)
     if (put_shell_in_new_group() == -1) {
         return -1;
     }
-    set_signals_to_ignore();
+    set_signal_disposition();
 
     /* Get terminal settings */
     tcgetattr(get_shell_terminal(), &(shell_param.shell_tmodes));
