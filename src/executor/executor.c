@@ -13,11 +13,11 @@
 #include <stdio.h>
 
 
-static void traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell);
+static int traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell);
 static void traverse_ast_in_subshell(Ast_node *ast_root, bool in_foreground);
 
 
-static void
+static int
 traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell)
 {
     /*
@@ -44,7 +44,7 @@ traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell)
 
         if (push_node_into_stack(node, &stack) == -1) {
             destroy_stack(&stack);
-            return;
+            return -1;
         }
         node = node->left;
     }
@@ -58,7 +58,7 @@ traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell)
        by the parent shell. This behavior is similar to bash. */
     if (!in_subshell && (return_stat == PIPE_TERM || return_stat == PIPE_SUSPND)) {
         destroy_stack(&stack);
-        return;
+        return -1;
     }
 
     node->return_val = return_val;
@@ -77,12 +77,14 @@ traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell)
 
             if (!in_subshell && (return_stat == PIPE_TERM || return_stat == PIPE_SUSPND)) {
                 destroy_stack(&stack);
-                return;
+                return -1;
             }
             node->right->return_val = return_val;
             update_node_status(node);
         }
     }
+
+    return 0;
 }
 
 
@@ -97,8 +99,7 @@ traverse_ast_in_subshell(Ast_node *ast_root, bool in_foreground)
             perror("Subshell spawning failed");
             break;
 
-        case 0:
-            /* Child shell */
+        case 0:  /* subshell */
             bool in_subshell = true;
 
             /* Change group */
@@ -106,10 +107,12 @@ traverse_ast_in_subshell(Ast_node *ast_root, bool in_foreground)
             setpgid(pid, pid);
 
             reset_signal_disposition();
+            disable_job_control();
             traverse_ast(ast_root, in_foreground, in_subshell);
             _exit(EXIT_SUCCESS); /* parent shell needs to reap it */
 
         default:
+            /* Change group of subshell */
             setpgid(pid, pid);
 
             /* Parent shell; adds subshell to job list */
@@ -135,10 +138,14 @@ execute(List_node *head)
         bool in_foreground = node->is_foreground;
         bool in_subshell   = !in_foreground;
 
-        if (in_foreground) {
-            traverse_ast(node->ast_root, in_foreground, in_subshell);
-        } else {
+        if (in_subshell) {
             traverse_ast_in_subshell(node->ast_root, in_foreground);
+        }
+
+        else {
+            if (traverse_ast(node->ast_root, in_foreground, in_subshell) == -1) {
+                return ;
+            }
         }
     }
 }
