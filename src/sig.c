@@ -1,7 +1,34 @@
 #include "sig.h"
+#include "job.h"
 
 #include <signal.h>
 #include <stdlib.h>
+
+
+void
+set_sigchld_disposition(void)
+{
+    struct sigaction action;
+
+    action.sa_handler = handle_async_jobs;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
+    sigaction(SIGCHLD, &action, NULL);
+}
+
+
+void
+ignore_sigchld(void)
+{
+    struct sigaction action;
+
+    action.sa_handler = SIG_IGN;
+    sigemptyset(&action.sa_mask);
+    action.sa_flags = 0;
+
+    sigaction(SIGCHLD, &action, NULL);
+}
 
 
 void
@@ -18,4 +45,5 @@ reset_signal_disposition(void)
     sigaction(SIGTSTP, &action, NULL);
     sigaction(SIGTTIN, &action, NULL);
     sigaction(SIGTTOU, &action, NULL);
+    ignore_sigchld();
 }

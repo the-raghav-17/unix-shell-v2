@@ -1,6 +1,7 @@
 #include "pipeline.h"
 #include "process.h"
 #include "shell.h"
+#include "sig.h"
 #include "job.h"
 #include "builtin.h"
 
@@ -320,7 +321,10 @@ launch_pipeline(Pipeline *pipeline, int *return_val, bool in_foreground, bool in
         tcsetpgrp(get_shell_terminal(), pipeline->gid);
     }
 
-    // TODO: Block SIGCHILD signal here for parent shell
+    // TODO: Block SIGCHILD signal here instead of ignoring for parent shell
+    if (!in_subshell) {
+        ignore_sigchld();
+    }
     /* Based on return status of waiting, set return values */
     Pipe_return_status return_stat = wait_for_pipeline(pipeline, in_subshell);
     switch (return_stat) {
@@ -336,6 +340,10 @@ launch_pipeline(Pipeline *pipeline, int *return_val, bool in_foreground, bool in
         case PIPE_TERM:  /* if pipeline was terminted, its reported as a failure */
             *return_val = 1;
             break;
+    }
+
+    if (!in_subshell) {
+        set_sigchld_disposition();
     }
 
     if (in_foreground) {
