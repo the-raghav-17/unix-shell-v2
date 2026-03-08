@@ -376,12 +376,12 @@ handle_async_jobs(int sig)
         else if (WIFCONTINUED(status)) {
             job->is_stopped = false;
         }
-        else if (WIFSIGNALED(status) || WIFSTOPPED(status)) {
+        else if (WIFSIGNALED(status) || WIFEXITED(status)) {
             job->is_completed = true;
         }
 
         notify_job_status(job);
-        if (WIFSIGNALED(status) || WIFSTOPPED(status)) {
+        if (WIFSIGNALED(status) || WIFEXITED(status)) {
             destroy_job_obj(job);
         }
     }
