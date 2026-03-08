@@ -2,6 +2,7 @@
 #include "pipeline.h"
 #include "process.h"
 #include "shell.h"
+#include "sig.h"
 
 #include <assert.h>
 #include <stdlib.h>
@@ -299,9 +300,6 @@ wait_for_job(Job *job)
 void
 put_job_in_foreground(Job *job, bool cont)
 {
-    // BUG TODO: Trying to put a subshell into foreground when
-    //  its stopped leads to a bug
-
     if (job == NULL) {
         return;
     }
@@ -315,7 +313,9 @@ put_job_in_foreground(Job *job, bool cont)
 
     job->in_foreground = true;
 
+    block_sigchld();
     wait_for_job(job);
+    unblock_sigchld();
     put_shell_in_foreground();
 }
 
