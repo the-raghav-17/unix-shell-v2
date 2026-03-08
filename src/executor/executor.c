@@ -53,9 +53,10 @@ traverse_ast(Ast_node *ast_root, bool in_foreground, bool in_subshell)
     Pipe_return_status return_stat 
         = launch_pipeline(node->pipeline, &return_val, in_foreground, in_subshell);
 
-    /* If pipeline was launched as part of subshell, then termination and suspension
-       should not affect tree traversal. This is not true if pipeline was launched
-       by the parent shell. This behavior is similar to bash. */
+    /* If pipeline was not launched by the subshell, then termination/suspension of that
+       pipeline should also terminate traversal of tree. But if the pipeline was launched
+       as a part of subshell, then suspension of that pipeline should not terminate tree
+       traversal. */
     if (!in_subshell && (return_stat == PIPE_TERM || return_stat == PIPE_SUSPND)) {
         destroy_stack(&stack);
         return -1;
@@ -106,16 +107,21 @@ traverse_ast_in_subshell(Ast_node *ast_root, bool in_foreground)
             pid = getpid();
             setpgid(pid, pid);
 
+            /* Subshell should be affected by signals
+               so that parent shell can monitor it. */
             reset_signal_disposition();
             disable_job_control();
             traverse_ast(ast_root, in_foreground, in_subshell);
-            _exit(EXIT_SUCCESS); /* parent shell needs to reap it */
+
+            /* Subshell either exits here, or terminates
+               due to signal while traversing and executing. */
+            _exit(EXIT_SUCCESS);
 
         default:
             /* Change group of subshell */
             setpgid(pid, pid);
 
-            /* Parent shell; adds subshell to job list */
+            /* Subshell now communicates with parent as a job. */
             bool is_stopped = false;
             Job *job = add_subshell_to_job(pid, is_stopped, in_foreground);
             if (job == NULL) {
@@ -144,7 +150,7 @@ execute(List_node *head)
 
         else {
             if (traverse_ast(node->ast_root, in_foreground, in_subshell) == -1) {
-                return ;
+                return;
             }
         }
     }

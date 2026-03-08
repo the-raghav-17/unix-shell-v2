@@ -7,6 +7,7 @@ void set_sigchld_disposition(void);
 void ignore_sigchld(void);
 void block_sigchld(void);
 void unblock_sigchld(void);
+void set_signal_disposition(void);
 
 
 #endif

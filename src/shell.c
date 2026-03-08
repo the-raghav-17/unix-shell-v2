@@ -7,7 +7,6 @@
 #include "sig.h"
 #include "token.h"
 #include "user.h"
-#include "job.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -18,7 +17,6 @@
 #include <termios.h>
 
 
-static void set_signal_disposition(void);
 static int put_shell_in_new_group(void);
 static int init_shell(void);
 static void display_prompt(void);
@@ -27,8 +25,8 @@ static void start_shell_loop(void);
 
 typedef struct Shell_param
 {
-    pid_t shell_pgid;
-    int   shell_terminal;
+    pid_t  shell_pgid;
+    int    shell_terminal;
     struct termios shell_tmodes;
 } Shell_param;
 
@@ -50,26 +48,6 @@ int
 get_shell_terminal(void)
 {
     return shell_param.shell_terminal;
-}
-
-
-static void
-set_signal_disposition(void)
-{
-    struct sigaction action;
-
-    action.sa_handler = SIG_IGN;
-    sigemptyset(&action.sa_mask);
-    action.sa_flags = 0;
-
-    /* These signals are to be ignored */
-    sigaction(SIGINT, &action, NULL);
-    sigaction(SIGQUIT, &action, NULL);
-    sigaction(SIGTSTP, &action, NULL);
-    sigaction(SIGTTIN, &action, NULL);
-    sigaction(SIGTTOU, &action, NULL);
-
-    set_sigchld_disposition();
 }
 
 
@@ -127,8 +105,8 @@ init_shell(void)
 #undef IS_SHELL_IN_FOREGROUND
 
 
-#define TEXT_COLOR_START "\e[32m"  /* green color */
-#define TEXT_COLOR_END   "\e[0m"
+#define COLOR_START "\e[32m"  /* green color */
+#define COLOR_END   "\e[0m"
 
 static void
 display_prompt(void)
@@ -150,7 +128,7 @@ display_prompt(void)
         cwd = "<null>";
     }
 
-    printf(TEXT_COLOR_START"%s@%s: %s\n"TEXT_COLOR_END, username, hostname, cwd);
+    printf(COLOR_START"%s@%s: %s\n"COLOR_END, username, hostname, cwd);
     printf("$> ");
     if (strcmp(cwd, "<null>")) {
         free(cwd);
@@ -161,6 +139,7 @@ display_prompt(void)
 #undef TEXT_COLOR_END
 
 
+/* Main shell loop. Read, tokenize, parse and execute */
 static void
 start_shell_loop(void)
 {

@@ -331,9 +331,6 @@ put_job_in_foreground(Job *job, bool cont)
 void
 handle_async_jobs(int sig)
 {
-    // TODO: Add sigchild ignoring for subshell
-    // TODO: Add sigchild blocking when waiting synchronously
-
     int status;
 
     while (1) {
