@@ -6,6 +6,26 @@
 
 
 void
+block_sigchld(void)
+{
+    sigset_t block_set;
+    sigemptyset(&block_set);
+    sigaddset(&block_set, SIGCHLD);
+    sigprocmask(SIG_BLOCK, &block_set, NULL);
+}
+
+
+void
+unblock_sigchld(void)
+{
+    sigset_t block_set;
+    sigemptyset(&block_set);
+    sigaddset(&block_set, SIGCHLD);
+    sigprocmask(SIG_UNBLOCK, &block_set, NULL);
+}
+
+
+void
 set_sigchld_disposition(void)
 {
     struct sigaction action;
