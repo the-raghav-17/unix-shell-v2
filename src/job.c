@@ -91,13 +91,16 @@ find_job_with_number(int job_number)
 static Job *
 get_job_with_pid(pid_t pid)
 {
-    for (Job *ptr = job_head; ptr != NULL; ptr = ptr->next) {
-        if (pid == ptr->gid && ptr->is_subshell) {
-            return ptr;
+    for (Job *job = job_head; job != NULL; job = job->next) {
+        if (job->is_subshell) {
+            if (job->gid == pid) {
+                return job;
+            }
+            continue;
         }
-        for (int i = 0; i < ptr->process_count; i++) {
-            if (ptr->process[i]->pid == pid) {
-                return ptr;
+        for (int i = 0; i < job->process_count; i++) {
+            if (job->process[i]->pid == pid) {
+                return job;
             }
         }
     }
