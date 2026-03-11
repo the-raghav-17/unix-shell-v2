@@ -123,7 +123,7 @@ traverse_ast_in_subshell(Ast_node *ast_root, bool in_foreground)
 
             /* Subshell now communicates with parent as a job. */
             bool is_stopped = false;
-            Job *job = add_subshell_to_job(pid, is_stopped, in_foreground);
+            Job *job = add_subshell_to_job(ast_root, pid, is_stopped, in_foreground);
             if (job == NULL) {
                 // TODO: Terminate subshell
                 fprintf(stderr, "shell: Terminating all commands in subshell\n");

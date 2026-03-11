@@ -30,6 +30,7 @@
 #include "process.h"
 #include "pipeline.h"
 #include "shell.h"
+#include "ast.h"
 
 #include <sys/types.h>
 #include <termios.h>
@@ -60,7 +61,7 @@ typedef struct Job
    by the caller as its managed by the job handler. */
 Job *add_pipeline_to_job(Pipeline *pipeline, bool is_stopped, bool in_foreground);
 
-Job *add_subshell_to_job(pid_t gid, bool is_stopped, bool in_foreground);
+Job *add_subshell_to_job(Ast_node *ast_root, pid_t gid, bool is_stopped, bool in_foreground);
 void notify_job_status(Job *job);
 Job *get_job_head(void);
 void put_job_in_foreground(Job *job, bool cont);

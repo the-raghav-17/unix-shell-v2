@@ -1,4 +1,5 @@
 #include "job.h"
+#include "stack.h"
 #include "pipeline.h"
 #include "process.h"
 #include "shell.h"
@@ -188,8 +189,49 @@ add_pipeline_to_job(Pipeline *pipeline, bool is_stopped, bool in_foreground)
 }
 
 
+#define SAFE_CONCAT_SIZE (sizeof(job->string) - strlen(job->string) - 1)
+
+static void
+create_job_string(Job *job, Ast_node *ast_root)
+{
+    Stack    *stack = NULL;
+    Ast_node *node  = ast_root;
+
+    while (node->type != PIPELINE) {
+        /* Push nodes into stack and go to left child until
+           node of type `PIPELINE` is not found */
+
+        if (push_node_into_stack(node, &stack) == -1) {
+            destroy_stack(&stack);
+            return;
+        }
+        node = node->left;
+    }
+
+    /* Add the first pipeline's string to job */
+    strncpy(job->string, node->pipeline->string, sizeof(job->string));
+
+    while (stack != NULL) {
+        node = pop_node_from_stack(&stack);
+
+        if (node->type == AND) {
+            strncat(job->string, " && ", SAFE_CONCAT_SIZE);
+        }
+        else if (node->type == OR) {
+            strncat(job->string, " || ", SAFE_CONCAT_SIZE);
+        }
+
+        Ast_node *right_child = node->right;
+        printf("%s\n", right_child->pipeline->string);
+        strncat(job->string, right_child->pipeline->string, SAFE_CONCAT_SIZE);
+    }
+}
+
+#undef SAFE_CONCAT_SIZE
+
+
 Job *
-add_subshell_to_job(pid_t gid, bool is_stopped, bool in_foreground)
+add_subshell_to_job(Ast_node *ast_root, pid_t gid, bool is_stopped, bool in_foreground)
 {
     Job *job_node = malloc(sizeof(*job_node));
     if (job_node == NULL) {
@@ -209,6 +251,8 @@ add_subshell_to_job(pid_t gid, bool is_stopped, bool in_foreground)
     
     /* Save terminal settings */
     tcgetattr(get_shell_terminal(), &job_node->tmodes);
+
+    create_job_string(job_node, ast_root);
 
     add_node_to_job_list(job_node);
     return job_node;
