@@ -62,6 +62,8 @@ destroy_pipeline_obj(Pipeline *pipeline)
 }
 
 
+#define SAFE_CONCAT_SIZE (sizeof(pipeline->string) - strlen(pipeline->string) - 1)
+
 void
 add_process_to_pipeline_string(Pipeline *pipeline, Process *process)
 {
@@ -69,15 +71,15 @@ add_process_to_pipeline_string(Pipeline *pipeline, Process *process)
         strncpy(pipeline->string, process->string, sizeof(pipeline->string));
     }
     else {
-        int safe_cat_size = sizeof(pipeline->string) - strlen(pipeline->string) - 1;
-
         /* Insert the pipe character */
-        strncat(pipeline->string, " | ", safe_cat_size);
+        strncat(pipeline->string, " | ", SAFE_CONCAT_SIZE);
 
         /* Insert the process string */
-        strncat(pipeline->string, process->string, safe_cat_size);
+        strncat(pipeline->string, process->string, SAFE_CONCAT_SIZE);
     }
 }
+
+#undef SAFE_CONCAT_SIZE
 
 
 int

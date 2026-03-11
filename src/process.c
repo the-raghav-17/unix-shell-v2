@@ -37,6 +37,8 @@ destroy_process_obj(Process *process)
 }
 
 
+#define SAFE_CONCAT_SIZE (sizeof(process->string) - strlen(process->string) - 1)
+
 void
 add_arg_to_process_string(Process *process, char *arg)
 {
@@ -48,15 +50,15 @@ add_arg_to_process_string(Process *process, char *arg)
         strncpy(process->string, arg, sizeof(process->string));
     }
     else {
-        int safe_cat_size = sizeof(process->string) - strlen(process->string) - 1;
-
         /* Add a space */
-        strncat(process->string, " ", safe_cat_size);
+        strncat(process->string, " ", SAFE_CONCAT_SIZE);
 
         /* Add the new argument */
-        strncat(process->string, arg, safe_cat_size);
+        strncat(process->string, arg, SAFE_CONCAT_SIZE);
     }
 }
+
+#undef SAFE_CONCAT_SIZE
 
 
 int
