@@ -236,6 +236,12 @@ create_and_exec_child_process(Pipeline *pipeline, int index, int infile, int out
                 }
                 setpgid(pid, pipeline->gid);
             }
+            else {
+                /* If in subshell, then gid of pipeline will be same as subshell's */
+                if (pipeline->gid == 0) {
+                    pipeline->gid = getpgrp();
+                }
+            }
             pipeline->process[index]->pid  = pid;
             pipeline->process[index]->pgid = pipeline->gid;
     }
