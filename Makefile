@@ -1,16 +1,31 @@
 CC := gcc
-CFLAGS := -Wall -Wextra
-OBJ_FLAG := -c
-DEBUG  := -g
-INCL_DIR := -Iinclude
 
 SRC_DIR := src
+INC_DIR := include
+BUILD_DIR := build
 
-all: src/ast.c src/process.c src/list.c src/parser.c src/pipeline.c src/utils.c src/lexer/*.c src/main.c src/shell.c src/io/input.c src/executor/*.c src/job.c src/sig.c src/builtin/*.c src/user.c
-	$(CC) $(CFLAGS) $(INCL_DIR) $^ -o shell
+CFLAGS := -Wall -Wextra -I$(INC_DIR)
+DEBUG_FLAGS := -g
 
-debug: src/ast.c src/process.c src/list.c src/parser.c src/pipeline.c src/utils.c src/lexer/*.c src/main.c src/shell.c src/io/input.c src/executor/*.c src/job.c src/sig.c src/builtin/*.c src/user.c
-	$(CC) $(CFLAGS) $(DEBUG) $(INCL_DIR) $^ -o shell
+SRC := $(shell find $(SRC_DIR) -name "*.c")
+
+OBJ := $(SRC:$(SRC_DIR)/%.c=$(BUILD_DIR)/%.o)
+
+TARGET := shell
+
+all: $(TARGET)
+
+$(TARGET): $(OBJ)
+	$(CC) $(CFLAGS) $^ -o $@
+
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
+	@mkdir -p $(dir $@)
+	$(CC) $(CFLAGS) -c $< -o $@
+
+debug: CFLAGS += $(DEBUG_FLAGS)
+debug: clean $(TARGET)
 
 clean:
-	rm  *.o a.out
+	rm -rf $(BUILD_DIR) $(TARGET)
+
+.PHONY: all debug clean
