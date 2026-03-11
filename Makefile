@@ -4,7 +4,7 @@ SRC_DIR := src
 INC_DIR := include
 BUILD_DIR := build
 
-CFLAGS := -Wall -Wextra -I$(INC_DIR)
+CFLAGS := -Wall -Wextra -Wno-unused-parameter -I$(INC_DIR)
 DEBUG_FLAGS := -g
 
 SRC := $(shell find $(SRC_DIR) -name "*.c")

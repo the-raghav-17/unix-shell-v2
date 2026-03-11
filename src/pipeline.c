@@ -246,6 +246,7 @@ create_and_exec_child_process(Pipeline *pipeline, int index, int infile, int out
                close(pipefd[READ_END]);
             }
             launch_process(pipeline->process[index], infile, outfile);
+            break;
 
         default:    /* parent process */
             if (!in_subshell) {

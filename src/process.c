@@ -2,6 +2,7 @@
 #include "sig.h"
 
 #include <stdbool.h>
+#include <errno.h>
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -112,7 +113,12 @@ launch_process(Process *process, int infile, int outfile)
     /* execvp fails */
     char buf[32];
     snprintf(buf, sizeof(buf), "%s", argv[0]);
-    perror(buf);
+    if (errno == ENOENT) {
+        fprintf(stderr, "%s: Command not found\n", buf);
+    }
+    else {
+        perror(buf);
+    }
     _exit(EXIT_FAILURE);
 }
 
