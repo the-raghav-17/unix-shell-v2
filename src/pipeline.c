@@ -69,11 +69,13 @@ add_process_to_pipeline_string(Pipeline *pipeline, Process *process)
         strncpy(pipeline->string, process->string, sizeof(pipeline->string));
     }
     else {
+        int safe_cat_size = sizeof(pipeline->string) - strlen(pipeline->string) - 1;
+
         /* Insert the pipe character */
-        strncat(pipeline->string, " | ", sizeof(pipeline->string));
+        strncat(pipeline->string, " | ", safe_cat_size);
 
         /* Insert the process string */
-        strncat(pipeline->string, process->string, sizeof(pipeline->string));
+        strncat(pipeline->string, process->string, safe_cat_size);
     }
 }
 

@@ -48,11 +48,13 @@ add_arg_to_process_string(Process *process, char *arg)
         strncpy(process->string, arg, sizeof(process->string));
     }
     else {
+        int safe_cat_size = sizeof(process->string) - strlen(process->string) - 1;
+
         /* Add a space */
-        strncat(process->string, " ", sizeof(process->string));
+        strncat(process->string, " ", safe_cat_size);
 
         /* Add the new argument */
-        strncat(process->string, arg, sizeof(process->string));
+        strncat(process->string, arg, safe_cat_size);
     }
 }
 
