@@ -221,3 +221,4 @@ Used tools like Valgrind and GDB to find and debug various memory errors and lea
 
 ---
 ## License
+GPLv3
