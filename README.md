@@ -9,6 +9,7 @@ This is an educational project I created to understand the process model and pro
 All of the code is written entirely in C without any help from AI chatbots and LLMs. All of the modules are written from scratch without use of any external libraries.
 
 ## Installation
+Make sure you've [GNU make](https://www.gnu.org/software/make/) and a C compiler installed. The default flag for the Makefile is set to use [GCC](https://gcc.gnu.org/) as the compiler, but you can use any other C compiler as well. Just don't forget to update the flag in the Makefile.
 
 Firstly, clone the repo locally.
 
@@ -16,7 +17,7 @@ Firstly, clone the repo locally.
 git clone git@github.com:the-raghav-17/unix-shell-v2.git ~/unix-shell && cd ~/unix-shell
 ```
 
-Then simply compile it using `make`. Make sure you've GNU Make installed.
+Then simply compile it using `make`.
 
 ``` sh
 make
