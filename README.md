@@ -13,6 +13,7 @@ Through building this project, I explored concepts such as process creation, int
 
 **Note**: All of the code in this project was written manually for learning purposes. **No chatbots or large language models (LLMs) were used in generating the shell code. The Makefile was generated with AI assistance.**
 
+---
 ## Installation
 Make sure you've [GNU make](https://www.gnu.org/software/make/) and a C compiler installed. The default flag for the Makefile is set to use [GCC](https://gcc.gnu.org/) as the compiler, but you can use any other C compiler as well. Just don't forget to update the flag in the Makefile.
 
@@ -41,6 +42,7 @@ $> exit
 [Exiting...]
 ```
 
+---
 ## Features
 1. **Command Chaining**
    - Supports conditional and sequential command execution using:
@@ -68,6 +70,7 @@ $> exit
 7. **Syntax error handling**
    - Detects and reports syntax errors in command input.
 
+---
 ## Limitations
 The following features are currently not supported:
 
@@ -81,9 +84,11 @@ The following features are currently not supported:
   - Command shell expansions are not impleneted.
 - **No command history or input editing**
   - The shell doesn't support interactive line editing features such as navigating command history using up arrow or editing the typed command.
+- **No tab auto-completion**
 
 The reason for not implementing these features was that they don't add much educational value compared to the core concepts like job control and signal handling.
 
+---
 ## Architecture and working
 The overall workflow of the shell consists of **input handling**, **parsing**, **executing** and **job management**.
 
@@ -150,6 +155,7 @@ While the shell continues accepting input, it also monitors background jobs (tha
 ### 6. Loop
 All of this is done while the shell is in an indefinite loop, unless the user explicitly wants to exit by typing `exit` command.
 
+---
 ## What I learned
 
 ### 1. Unix/Linux Programming interface
@@ -179,6 +185,7 @@ Experienced the importance of modular code and clean interfaces as the shell gre
 ### 9. Manual memory management and debugging memory errors
 Used tools like Valgrind and GDB to find and debug various memory errors and leaks.
 
+---
 ## References
 - [A great blog to get an overview of terminals and where the shell sits](https://www.linusakesson.net/programming/tty/)
 - [Another great series of blogs to get an overview of tty, pty and shells](https://dev.to/napicella/linux-terminals-tty-pty-and-shell-192e)
@@ -197,6 +204,7 @@ Used tools like Valgrind and GDB to find and debug various memory errors and lea
 - Various random stackoverflow threads
 - Various random reddit threads
 
+---
 ## Tools and technologies used
 - GCC (Compiler)
 - Make (Build system)
@@ -206,3 +214,10 @@ Used tools like Valgrind and GDB to find and debug various memory errors and lea
 - VS Codium (Open source code editor)
 - (Doom) Emacs (Another editor)
 - Linux Fedora (System)
+
+---
+## Bugs
+- Trying to continue a stopped job in background using `bg` builtin leads to printing of job status notification multiple times (it should only print once).
+
+---
+## License
