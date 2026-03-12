@@ -149,3 +149,33 @@ While the shell continues accepting input, it also monitors background jobs (tha
 
 ### 6. Loop
 All of this is done while the shell is in an indefinite loop, unless the user explicitly wants to exit by typing `exit` command.
+
+## What I learned
+
+### 1. Unix/Linux Programming interface
+Gained deeper understanding of system calls, process management and the programming interfaces provided by Unix and Linux
+
+### 2. Process creation and monitoring
+Learned to create and manage processes using `fork()`, `exec()` family of system calls and `wait()`/`waitpid()`/`waitid()`.
+
+### 3. File descriptor manipulation and IPC
+Learned how to redirect input/output streams and implement interprocess communication using pipes.
+
+### 4. Signals in Unix/Linux
+Learned signal handling, blocking and queuing using `signal()` and `sigaction()`. Learned about various signals and signal types like `SIGINT`, `SIGTSTP` and `SIGCHLD`.
+
+### 5. Terminal subsystem
+Understood how terminals manage foreground and background process groups and how signals interact with them.
+
+### 6. Process groups and terminal control
+Learned to manage process groups to simplify signal delivery. Used `tcgetpgrp()` and `tcsetpgrp()` to manage terminal ownership.
+
+### 7. Data structures
+Applied linked lists, dynamic arrays and trees (ASTs) to manage jobs, command and pipelines efficiently.
+
+### 8. Program management
+Experienced the importance of modular code and clean interfaces as the shell grew in complexity.
+
+### 9. Manual memory management and debugging memory errors
+Used tools like Valgrind and GDB to find and debug various memory errors and leaks.
+
