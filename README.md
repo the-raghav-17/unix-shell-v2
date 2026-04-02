@@ -22,7 +22,7 @@ Make sure you've [GNU make](https://www.gnu.org/software/make/) and a C compiler
 Firstly, clone the repo locally.
 
 ``` sh
-git clone git@github.com:the-raghav-17/unix-shell-v2.git ~/unix-shell && cd ~/unix-shell
+git clone https://github.com/the-raghav-17/unix-shell-v2.git ~/unix-shell && cd ~/unix-shell
 ```
 
 Then simply compile it using `make`.
